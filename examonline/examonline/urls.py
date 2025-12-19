@@ -25,7 +25,7 @@ urlpatterns = [
     path('api/v1/', include('user.api.urls')),
     path('api/v1/', include('testquestion.api.urls')),
     path('api/v1/', include('testpaper.api.urls')),
-    # path('api/v1/', include('examination.api.urls')),
+    path('api/v1/', include('examination.api.urls')),
     # path('api/v1/', include('operation.api.urls')),
 ]
 

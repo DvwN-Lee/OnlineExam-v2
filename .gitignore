@@ -44,6 +44,10 @@ db.sqlite3-journal
 *~
 .DS_Store
 
+# AI Tools
+.claude/
+.gemini/
+
 # uv
 .uv/
 uv.lock

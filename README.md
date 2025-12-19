@@ -123,30 +123,43 @@ uv run python manage.py runserver
 - Docker Compose 설정
 - Database 정규화
 
-### Phase 2: Backend API (완료)
+### Phase 2: Core Backend API (완료)
 - Django REST Framework
 - JWT 인증
 - 역할 기반 권한 (학생/교사)
 - Swagger/OpenAPI 문서화
 - 사용자 관리 API
 
-### Phase 3: 문제 관리 (진행 중)
-- 문제 CRUD
-- 문제 은행
-- 문제 공유
-- 객관식, 주관식, OX 문제
+### Phase 3: Question Management API (완료)
+- Question CRUD (Issues #1)
+- 필터링 및 검색 (Issues #2)
+- 문제 공유 기능 (Issues #3)
+- 문제 은행 관리 (Issues #4)
+- Test Coverage: 98%
 
-### Phase 4: 시험 관리 (계획)
-- 시험지 생성
-- 시험 일정 관리
-- 학생 등록
-- 실시간 시험 응시
+### Phase 4: Examination System API (완료)
+- TestPaper Management (Issues #5)
+- Examination Scheduling (Issues #6)
+- Exam Taking (Issues #7)
+- Scores & Grading (Issues #8)
+- Test Coverage: 92-97%
 
-### Phase 5: Frontend (계획)
-- React 19 + TypeScript
-- Tailwind CSS를 활용한 현대적 UI
-- 실시간 업데이트
-- 반응형 디자인
+### Phase 5: Frontend Development (계획)
+- React 19 + TypeScript 프로젝트 초기화 (Issues #9)
+- 인증 및 사용자 관리 UI (Issues #10)
+- 문제 관리 UI (Issues #11)
+- 시험지 및 시험 관리 UI (Issues #12)
+- 시험 응시 UI (Issues #13)
+- 대시보드 UI (Issues #14)
+
+### Phase 6: DevOps & Deployment (계획)
+- Docker & Docker Compose (Issues #15)
+- Kubernetes + Helm (Issues #16)
+- Terraform IaC (Issues #17)
+- CI/CD Pipeline (Issues #18)
+- ArgoCD GitOps (Issues #19)
+- 모니터링 및 로깅 (Issues #20)
+- Celery 비동기 작업 (Issues #21)
 
 ## 문서
 

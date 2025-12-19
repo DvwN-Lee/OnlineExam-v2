@@ -179,66 +179,6 @@ GET /api/v1/questions/
 
 ---
 
-## Gemini와 논의할 사항
-
-### 1. 테스트 전략
-
-**Question**: 현재 6개 기본 테스트가 통과했습니다. 다음 단계로:
-- pytest 단위 테스트 20개 케이스 실행?
-- 추가 통합 테스트 시나리오 작성?
-- 부하 테스트 (Locust) 준비?
-
-**현황**:
-- 작성된 pytest 테스트: 20개
-- 실행 가능 pytest: ❌ (pytest 패키지 미설치)
-- 수동 API 테스트: ✅ 6/6 통과
-
-### 2. 테스트 Coverage
-
-**Question**: 현재 테스트 커버리지가 충분한가?
-
-**커버된 영역**:
-- 인증 및 권한 ✅
-- 기본 CRUD (일부) ✅
-- 필터링 (일부) ✅
-- 문제 은행 (일부) ✅
-
-**미커버 영역**:
-- Update/Delete operations
-- Validation (옵션 개수, 정답 검증)
-- 학생 사용자 시나리오
-- 동시성 테스트
-- 에러 핸들링
-
-### 3. 성능 벤치마크
-
-**Question**: API 성능 목표는?
-
-**현재 응답 시간** (추정):
-- Token 발급: < 100ms
-- 문제 생성: < 200ms
-- 문제 목록: < 150ms
-
-**제안 목표**:
-- 95th percentile < 500ms
-- 동시 사용자 50명 처리
-
-### 4. 다음 구현 단계
-
-**Phase 4**: Test Paper Management API
-- 시험지 CRUD
-- 문제-시험지 매핑
-- 자동 점수 계산
-
-**Phase 5**: Examination Management API
-- 시험 생성/관리
-- 학생 응시
-- 성적 관리
-
-**Question**: Phase 4로 진행할까요, 아니면 Phase 3 테스트를 완료할까요?
-
----
-
 ## 추천 작업 순서
 
 ### 우선순위 1 (Critical)
@@ -306,8 +246,6 @@ GET /api/v1/questions/
 ## 참고 문서
 
 - 상세 테스트 계획: `/docs/phase3-testing-plan.md`
-- Gemini 논의 가이드: `/docs/testing-discussion-guide.md`
-- API 구현 계획: `~/.claude/plans/idempotent-chasing-flask.md`
 
 ---
 
@@ -320,9 +258,3 @@ GET /api/v1/questions/
 2. 학생 사용자 시나리오 테스트
 3. Validation 및 에러 핸들링 검증
 4. Phase 4 (Test Paper API) 구현 시작
-
-**Gemini와 논의 필요 사항**:
-- 테스트 커버리지 목표 설정
-- 성능 벤치마크 기준
-- CI/CD 파이프라인 전략
-- Phase 4 구현 우선순위

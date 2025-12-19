@@ -137,7 +137,7 @@ class TestQuestionCRUD:
         assert question_with_options.is_del is True
 
     def test_update_question_with_options(self, api_client, teacher_user, question_with_options):
-        """문제 수정 시 옵션 내용 및 정답 여부를 변경할 수 있다 (Gemini 권장)"""
+        """문제 수정 시 옵션 내용 및 정답 여부를 변경할 수 있다"""
         api_client.force_authenticate(user=teacher_user)
         url = reverse('question-detail', kwargs={'pk': question_with_options.id})
 
@@ -167,7 +167,7 @@ class TestQuestionCRUD:
         assert option_b.is_right is True
 
     def test_deleted_question_not_accessible(self, api_client, teacher_user, question_with_options):
-        """삭제된 문제(is_del=True)는 조회 시 404를 반환한다 (Gemini 권장)"""
+        """삭제된 문제(is_del=True)는 조회 시 404를 반환한다"""
         # 문제를 삭제 상태로 설정
         question_with_options.is_del = True
         question_with_options.save()
@@ -306,3 +306,49 @@ class TestMyAndSharedEndpoints:
         url = reverse('question-shared')
         response = api_client.get(url)
         assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+class TestQuestionValidation:
+    """문제 생성 시 유효성 검증 테스트"""
+
+    def test_multiple_choice_with_insufficient_options(self, api_client, teacher_user, subject):
+        """객관식 문제는 최소 2개 이상의 옵션 필요"""
+        api_client.force_authenticate(user=teacher_user)
+        url = reverse('question-list')
+        data = {
+            'name': 'Test Question',
+            'subject_id': subject.id,
+            'score': 10,
+            'tq_type': 'xz',  # 객관식
+            'tq_degree': 'jd',
+            'options': [
+                {'option': 'Option 1', 'is_right': True}  # 1개만
+            ]
+        }
+
+        response = api_client.post(url, data, format='json')
+
+        assert response.status_code == 400
+        assert '최소 2개 이상' in str(response.data)
+
+    def test_multiple_choice_without_correct_answer(self, api_client, teacher_user, subject):
+        """객관식 문제는 최소 1개 이상의 정답 필요"""
+        api_client.force_authenticate(user=teacher_user)
+        url = reverse('question-list')
+        data = {
+            'name': 'Test Question',
+            'subject_id': subject.id,
+            'score': 10,
+            'tq_type': 'xz',  # 객관식
+            'tq_degree': 'jd',
+            'options': [
+                {'option': 'Option 1', 'is_right': False},
+                {'option': 'Option 2', 'is_right': False}  # 정답 없음
+            ]
+        }
+
+        response = api_client.post(url, data, format='json')
+
+        assert response.status_code == 400
+        assert '정답 옵션' in str(response.data)

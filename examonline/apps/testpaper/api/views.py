@@ -59,9 +59,9 @@ class TestPaperViewSet(viewsets.ModelViewSet):
         - 교사: 모든 시험지 조회 가능 (수정은 본인 것만 가능)
         - 학생: 추후 연결된 시험의 시험지만 (현재는 전체)
         """
-        # Handle schema generation
-        if getattr(self, 'swagger_fake_view', False):
-            return TestPaperInfo.objects.none()
+        # Handle schema generation  # pragma: no cover
+        if getattr(self, 'swagger_fake_view', False):  # pragma: no cover
+            return TestPaperInfo.objects.none()  # pragma: no cover
 
         base_qs = TestPaperInfo.objects.all().select_related('subject', 'create_user').prefetch_related(
             'testpapertestq_set__test_question'

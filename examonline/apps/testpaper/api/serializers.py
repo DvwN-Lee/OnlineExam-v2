@@ -257,3 +257,214 @@ class AddQuestionsSerializer(serializers.Serializer):
             raise serializers.ValidationError('동일한 문제를 중복하여 추가할 수 없습니다.')
 
         return value
+
+
+# ==================== 성적 관련 Serializers ====================
+
+from testpaper.models import TestScores
+from testquestion.models import OptionInfo
+from user.models import StudentsInfo
+
+
+class StudentBasicSerializer(serializers.ModelSerializer):
+    """학생 기본 정보 Serializer"""
+
+    class Meta:
+        model = StudentsInfo
+        fields = ['id', 'student_name', 'student_id', 'student_class']
+
+
+class MyScoreListSerializer(serializers.ModelSerializer):
+    """
+    학생용 성적 목록 Serializer.
+    """
+
+    exam_name = serializers.CharField(source='exam.name', read_only=True)
+    subject_name = serializers.CharField(source='exam.subject.subject_name', read_only=True)
+    exam_date = serializers.DateTimeField(source='exam.start_time', read_only=True)
+    paper_name = serializers.CharField(source='test_paper.name', read_only=True)
+    passed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TestScores
+        fields = [
+            'id',
+            'exam_name',
+            'subject_name',
+            'exam_date',
+            'paper_name',
+            'test_score',
+            'start_time',
+            'submit_time',
+            'time_used',
+            'passed',
+        ]
+
+    def get_passed(self, obj):
+        """합격 여부"""
+        if obj.test_paper and obj.is_submitted:
+            return obj.test_score >= obj.test_paper.passing_score
+        return None
+
+
+class QuestionResultSerializer(serializers.Serializer):
+    """문제별 결과 Serializer"""
+
+    question_id = serializers.IntegerField()
+    question_name = serializers.CharField()
+    question_type = serializers.CharField()
+    question_type_display = serializers.CharField()
+    user_answer = serializers.CharField(allow_blank=True, allow_null=True)
+    correct_answer = serializers.CharField(allow_blank=True, allow_null=True)
+    is_correct = serializers.BooleanField(allow_null=True)
+    score = serializers.IntegerField()
+    max_score = serializers.IntegerField()
+
+
+class MyScoreDetailSerializer(serializers.ModelSerializer):
+    """
+    학생용 성적 상세 Serializer.
+    문제별 정답/오답 포함.
+    """
+
+    exam_name = serializers.CharField(source='exam.name', read_only=True)
+    subject_name = serializers.CharField(source='exam.subject.subject_name', read_only=True)
+    paper_name = serializers.CharField(source='test_paper.name', read_only=True)
+    total_possible = serializers.IntegerField(source='test_paper.total_score', read_only=True)
+    passing_score = serializers.IntegerField(source='test_paper.passing_score', read_only=True)
+    passed = serializers.SerializerMethodField()
+    question_results = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TestScores
+        fields = [
+            'id',
+            'exam_name',
+            'subject_name',
+            'paper_name',
+            'test_score',
+            'total_possible',
+            'passing_score',
+            'passed',
+            'start_time',
+            'submit_time',
+            'time_used',
+            'question_results',
+        ]
+
+    def get_passed(self, obj):
+        """합격 여부"""
+        if obj.test_paper:
+            return obj.test_score >= obj.test_paper.passing_score
+        return False
+
+    def get_question_results(self, obj):
+        """문제별 결과"""
+        if not obj.detail_records:
+            return []
+
+        # 시험지의 문제 목록 가져오기
+        paper_questions = TestPaperTestQ.objects.filter(test_paper=obj.test_paper).select_related(
+            'test_question'
+        ).order_by('order')
+
+        results = []
+        for pq in paper_questions:
+            question = pq.test_question
+            question_id_str = str(question.id)
+            record = obj.detail_records.get(question_id_str, {})
+
+            # 정답 찾기
+            correct_answer = None
+            if question.tq_type in ['xz', 'pd']:  # 객관식, OX
+                try:
+                    correct_option = OptionInfo.objects.get(test_question=question, is_right=True)
+                    correct_answer = correct_option.option
+                except OptionInfo.DoesNotExist:
+                    pass
+
+            results.append({
+                'question_id': question.id,
+                'question_name': question.name,
+                'question_type': question.tq_type,
+                'question_type_display': question.get_tq_type_display(),
+                'user_answer': record.get('answer', ''),
+                'correct_answer': correct_answer,
+                'is_correct': record.get('is_correct'),
+                'score': record.get('score', 0),
+                'max_score': pq.score,
+            })
+
+        return results
+
+
+class ExamScoreListSerializer(serializers.ModelSerializer):
+    """
+    교사용 시험별 성적 목록 Serializer.
+    """
+
+    student = StudentBasicSerializer(source='user', read_only=True)
+    passed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TestScores
+        fields = [
+            'id',
+            'student',
+            'test_score',
+            'start_time',
+            'submit_time',
+            'time_used',
+            'is_submitted',
+            'passed',
+        ]
+
+    def get_passed(self, obj):
+        """합격 여부"""
+        if obj.test_paper and obj.is_submitted:
+            return obj.test_score >= obj.test_paper.passing_score
+        return None
+
+
+class ExamStatisticsSerializer(serializers.Serializer):
+    """시험 성적 통계 Serializer"""
+
+    exam_id = serializers.IntegerField()
+    exam_name = serializers.CharField()
+    total_students = serializers.IntegerField()
+    submitted_count = serializers.IntegerField()
+    not_submitted_count = serializers.IntegerField()
+    average_score = serializers.FloatField()
+    highest_score = serializers.IntegerField()
+    lowest_score = serializers.IntegerField()
+    pass_count = serializers.IntegerField()
+    fail_count = serializers.IntegerField()
+    pass_rate = serializers.FloatField()
+
+
+class ManualGradeSerializer(serializers.Serializer):
+    """수동 채점용 Serializer"""
+
+    question_id = serializers.IntegerField()
+    score = serializers.IntegerField(min_value=0)
+    comment = serializers.CharField(required=False, allow_blank=True)
+
+    def validate(self, attrs):
+        """배점 검증"""
+        question_id = attrs['question_id']
+        score = attrs['score']
+
+        # TestScores 인스턴스 가져오기
+        test_score = self.context.get('test_score')
+        if not test_score:
+            raise serializers.ValidationError('성적 정보를 찾을 수 없습니다.')
+
+        # 문제의 최대 배점 확인
+        try:
+            pq = TestPaperTestQ.objects.get(test_paper=test_score.test_paper, test_question_id=question_id)
+            if score > pq.score:
+                raise serializers.ValidationError({'score': f'배점은 최대 {pq.score}점까지 가능합니다.'})
+        except TestPaperTestQ.DoesNotExist:
+            raise serializers.ValidationError({'question_id': '시험지에 없는 문제입니다.'})
+
+        return attrs
