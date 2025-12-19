@@ -52,11 +52,19 @@ class TestScores(models.Model):
     detail_records = models.JSONField(default=dict, verbose_name='상세 답안 기록', blank=True)
     create_time = models.DateTimeField(default=timezone.now, verbose_name='생성 시간')
 
+    # 시험 응시 관련 필드
+    exam = models.ForeignKey('examination.ExaminationInfo', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='시험 정보')
+    start_time = models.DateTimeField(null=True, blank=True, verbose_name='시험 시작 시간')
+    submit_time = models.DateTimeField(null=True, blank=True, verbose_name='제출 시간')
+    is_submitted = models.BooleanField(default=False, verbose_name='제출 여부')
+    time_used = models.IntegerField(default=0, verbose_name='소요 시간(분)')
+
     class Meta:
         verbose_name = '학생 성적 정보'
         verbose_name_plural = verbose_name
         indexes = [
             models.Index(fields=['user', 'test_paper']),
+            models.Index(fields=['exam', 'user']),
         ]
 
     def __str__(self):

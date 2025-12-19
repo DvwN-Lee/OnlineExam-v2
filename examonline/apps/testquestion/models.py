@@ -19,7 +19,7 @@ class TestQuestionInfo(models.Model):
     is_del = models.BooleanField(default=False, verbose_name='삭제 여부')
     is_share = models.BooleanField(default=False, verbose_name='공유 여부')
     create_time = models.DateTimeField(default=timezone.now, verbose_name='생성 시간')
-    creat_user = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, verbose_name='출제자')
+    create_user = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, verbose_name='출제자')
     edit_time = models.DateTimeField(auto_now=True, verbose_name='수정 시간')
 
     class Meta:

@@ -17,7 +17,7 @@ class TestQuestionInfoAdmin(admin.ModelAdmin):
         'is_del',
         'is_share',
         'create_time',
-        'creat_user',
+        'create_user',
         'edit_time',
     )
     # 검색

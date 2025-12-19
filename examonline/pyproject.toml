@@ -57,7 +57,7 @@ known-first-party = ["examonline", "apps"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.local"
-python_files = ["test_*.py", "*_test.py"]
+python_files = ["test_*.py", "*_test.py", "tests.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
@@ -66,4 +66,7 @@ addopts = [
     "--cov=apps",
     "--cov-report=term-missing",
     "--cov-report=html",
+]
+filterwarnings = [
+    "ignore::pytest.PytestCollectionWarning",
 ]
