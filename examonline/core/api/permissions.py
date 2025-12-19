@@ -53,8 +53,6 @@ class IsOwnerOrTeacher(BasePermission):
             return obj.user == request.user
         if hasattr(obj, 'create_user'):
             return obj.create_user == request.user
-        if hasattr(obj, 'creat_user'):  # Note: typo in original model
-            return obj.creat_user == request.user
 
         return False
 
@@ -101,4 +99,4 @@ class IsQuestionOwner(BasePermission):
             return obj.is_share and not obj.is_del
 
         # Only the creator can modify/delete
-        return obj.creat_user == request.user
+        return obj.create_user == request.user
